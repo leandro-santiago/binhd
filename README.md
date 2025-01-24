@@ -5,20 +5,25 @@ BinHD is a Python implementation based on ["A Binary Learning Framework for Hype
 # Usage
 ## Prerequisites
 
-First, install PyTorch using their [installation instructions](https://pytorch.org/get-started/locally/). Then, use one of the following commands to install Torchhd:
+First, install PyTorch using their [installation instructions](https://pytorch.org/get-started/locally/). Then, use the following command to install Torchhd:
 
 ```bash
 pip install torch-hd
 ```
 
-Requirements: PyTorch, Torchhd and ucimlrepo to load datasets from UCI repository.
+Then, use the following command to install BinHD:
 
+```bash
+pip install binhd
+```
+
+Requirements: PyTorch, Torchhd and ucimlrepo to load datasets from UCI repository.
 
 ## Quick Start
 
 ### Iris Example
 
-To quickly get started with BinHD, here's an example using the Iris dataset. Full training code is available in the [test_iris.py](test_iris.py) file.
+To quickly get started with BinHD, here's an example using the Iris dataset. Full training code is available in the [examples/iris.py](examples/iris.py) file.
 
 ```python
 import torch
@@ -80,9 +85,10 @@ with torch.no_grad():
     predictions = model.predict(X_test)  
     acc = accuracy_score(predictions, y_test)
     print("BinHD - Adapt: Accuracy = ", acc)
+    
 ```
 
 ## Supported HDC/VSA models
 Currently, the library supports the following HDC/VSA models:
 
-- BinHD.
+- [BinHD](https://ieeexplore.ieee.org/document/8714821). 

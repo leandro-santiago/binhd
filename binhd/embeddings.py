@@ -5,10 +5,11 @@ from torch.nn.parameter import Parameter
 
 import torchhd.functional as functional
 from torchhd.tensors.bsc import BSCTensor
-
+from sklearn.preprocessing import LabelEncoder
 
 __all__ = [
-    "ScatterCode",    
+    "ScatterCode",   
+    "CategoricalEncoder", 
 ]
 
 def bin_level(
@@ -142,3 +143,33 @@ class ScatterCode(nn.Embedding):
         index = index.clamp(min=0, max=self.num_embeddings - 1)
         vsa_tensor = functional.get_vsa_tensor_class(self.vsa)
         return super().forward(index).as_subclass(vsa_tensor)
+
+class CategoricalEncoder(nn.Module):
+    def __init__(self, out_features, dtype = torch.uint8):
+        super(CategoricalEncoder, self).__init__() 
+        self.dimension = out_features
+        self.num_features = 0
+        self.hv_matrix = []
+        self.dtype = dtype
+
+    def fit_transform(self, data):
+        self.num_features = data.shape[1]                
+
+        for i in range(self.num_features):
+            encoder = LabelEncoder()
+            data.iloc[:, i] = encoder.fit_transform(data.iloc[:, i])
+            num_values = len(encoder.classes_)        
+            self.hv_matrix.append(functional.random(num_values, self.dimension, vsa="BSC", dtype=self.dtype))
+
+        return data.astype("int32")    
+
+    def forward(self, x):
+        x.transpose_(1, 0)
+        
+        sample_hv = torch.empty((x.shape[0], x.shape[1], self.dimension), dtype=torch.int8)
+        
+        for i in range(self.num_features):
+            sample_hv[i] = torch.index_select(self.hv_matrix[i], 0, x[i])
+            
+        sample_hv = torch.permute(sample_hv, (1, 0, 2))        
+        return sample_hv.as_subclass(BSCTensor)
